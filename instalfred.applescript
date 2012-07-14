@@ -19,60 +19,62 @@ end tell
 tell application "System Events"
 	if front_app = "Safari" then
 		tell application "Safari"
-			get URL of front document
+			set theurl to get URL of front document
+			set thetitle to get name of front document
 		end tell
 		
 	else if front_app = "Google Chrome" then
 		tell application "Google Chrome"
-			get URL of active tab of first window
+			set theurl to get URL of active tab of first window
+			set thetitle to get title of active tab of first window
 		end tell
 	else
 		--default to safari, but notify me that it was a little strange
 		if growlIsRunning then
 			tell application id "com.Growl.GrowlHelperApp"
-				notify with name Â¬
-					"Other Error" title Â¬
-					"Unrecognized App" description Â¬
+				notify with name Â
+					"Other Error" title Â
+					"Unrecognized App" description Â
 					"Safari or Chrome were not your front most apps.  Selecting Safari as the URL source." application name "Instapaper"
 			end tell
 		end if
 		tell application "Safari"
-			get URL of front document
+			set theurl to get URL of front document
+			set thetitle to get name of front document
 		end tell
 	end if
 end tell
 
-set input to result
-set statuscode to do shell script "curl -s --user " & authinfo & " --data-urlencode url=" & input & " https://www.instapaper.com/api/add"
+set statuscode to do shell script "curl -s --user " & authinfo & " --data-urlencode url=" & theurl & " https://www.instapaper.com/api/add"
 
 if growlIsRunning then
 	tell application id "com.Growl.GrowlHelperApp"
 		if statuscode = "201" then
-			notify with name Â¬
-				"Success" title Â¬
-				"Instapaper" description Â¬
-				"The article was sent to Instapaper successfully." application name Â¬
+			notify with name Â
+				"Success" title Â
+				"Instapaper" description Â
+				"'" & thetitle & "' was sent to Instapaper successfully." application name Â
 				"Instapaper" image from location iconfile
 			
 		else if statuscode = "400" then
-			notify with name Â¬
-				"Other Error" title Â¬
-				"Instapaper " description Â¬
-				"Error: bad request." application name Â¬
+			notify with name Â
+				"Other Error" title Â
+				"Instapaper " description Â
+				"Error: bad request." application name Â
 				"Instapaper" image from location iconfile
 			
 		else if statuscode = "403" then
-			notify with name Â¬
-				"Authentication Error" title Â¬
-				"Instapaper " description Â¬
-				"Error: authenticaion failed." application name Â¬
+			notify with name Â
+				"Authentication Error" title Â
+				"Instapaper " description Â
+				"Error: authenticaion failed." application name Â
 				"Instapaper" image from location iconfile
 			
 		else
-			notify with name Â¬
-				"Other Error" title Â¬
-				"Instapaper " description Â¬
-				"The article could not be saved." application name Â¬
+			notify with name Â
+				"Other Error" title Â
+				"Instapaper " description Â
+				"The article could not be saved." application name Â
 				"Instapaper" image from location iconfile
 		end if
 	end tell
